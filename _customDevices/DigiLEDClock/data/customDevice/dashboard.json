@@ -1,0 +1,89 @@
+[
+  {
+    "type": "group",
+    "name": "dashboard",
+    "caption": "Dashboard",
+    "data": [
+      {
+        "type": "text",
+        "name": "message",
+        "caption": "Send message",
+        "event": "~/event/device/message",
+        "action": "~/set/device/message"
+      },
+      {
+        "type": "group",
+        "name": "power_group",
+        "caption": "Power",
+        "data": [
+          {
+            "type": "checkbox",
+            "name": "powerOverride",
+            "caption": "Override Power",
+            "event": "~/event/device/powerOverride",
+            "action": "~/set/device/powerOverride"
+          },
+          {
+            "type": "checkbox",
+            "name": "power",
+            "caption": "LED Power",
+            "event": "~/event/device/power",
+            "action": "~/set/device/power"
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "name": "brightness_group",
+        "caption": "Brightness",
+        "data": [
+          {
+            "type": "checkbox",
+            "name": "brightnessOverride",
+            "caption": "Override Brightness",
+            "event": "~/event/device/brightnessOverride",
+            "action": "~/set/device/brightnessOverride"
+          },
+          {
+            "type": "slider",
+            "min": "1",
+            "max": "15",
+            "name": "brightness",
+            "caption": "LED Brightness",
+            "event": "~/event/device/brightness",
+            "action": "~/set/device/brightness"
+          }
+        ]
+      },
+      {
+        "type": "group",
+        "name": "timing_group",
+        "caption": "Timing",
+        "data": [
+          {
+            "type": "text",
+            "name": "animDelay",
+            "caption": "Animation Delay",
+            "event": "~/event/device/animDelay",
+            "action": "~/set/device/animDelay",
+            "inputtype": "number"
+          },
+          {
+            "type": "text",
+            "name": "messageTime",
+            "caption": "Message Display Time",
+            "event": "~/event/device/messageTime",
+            "action": "~/set/device/messageTime",
+            "inputtype": "number"
+          }
+        ]
+      },
+      {
+          "type": "button",
+          "name": "dash_apply",
+          "caption": "Save",
+          "action": "~/set/device/saveconfig"
+      }
+    ]
+  }
+]
