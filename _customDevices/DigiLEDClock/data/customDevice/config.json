@@ -1,7 +1,8 @@
 {
-    "initialBrightness": 0,
-    "brightnessOverride": 0,
-    "powerOverride": 0,
-    "animDelay": 100,
-    "messageTime": 20
+    "initialBrightness": 0,   // 0-15
+    "brightnessOverride": 0,  // 0|1
+    "powerOverride": 0,       // 0|1
+    "animDelay": 100,         // pause between anim steps (ms)
+    "messageTime": 20,        // time until message removed and clock up again
+    "mqttInterval": 179        // pause between MQTT status updates
 }

@@ -1,5 +1,6 @@
 #include "framework/Core/Clock.h"
 #include "framework/Utils/SysUtils.h"
+#include <time.h>
 
 //###############################################################################
 //  NTP clock

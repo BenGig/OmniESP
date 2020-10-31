@@ -5,8 +5,8 @@
 //  Device
 //===============================================================================
 
-#include "sys_fixed_single.h"
 #include "framework/Utils/SysUtils.h"
+#include "sys_fixed_single.h"
 #include "framework/Utils/Logger.h"
 
 //-------------------------------------------------------------------------------
@@ -79,27 +79,19 @@ void customDevice::handle() {
     P.displayReset();
   }
   unsigned long now = millis();
+  // update display every second (clock only; animation done by display)
   if (now - lastPoll >= 1000) {
     lastPoll = now;
     if (msgTimer > 0) msgTimer--;
     displayTime();
+
+    // update MQTT every 3 minutes
     informDelay++;
-    if (informDelay >= 59) {
+    if (informDelay >= 179) {
       inform();
       informDelay = 0;
     }
   }
-//   unsigned long TEST_now = millis();
-//   if (TEST_now - TEST_lastPoll >= 20000) {
-//     TEST_lastPoll = TEST_now;
-//     strcpy(msgbuf, "  Testübertragung");
-//     String buf = UTF8toISO8859_1(msgbuf);
-// //    for (uint8_t i=0; i<ARRAY_SIZE(msgbuf); i++)
-// //      utf8Ascii(msgbuf[i]);
-//     strcpy(msgbuf, buf.c_str());
-//
-//     displayText();
-//   }
 }
 
 //...............................................................................
@@ -177,6 +169,10 @@ String customDevice::set(Topic &topic) {
     messageTime = topic.getArgAsLong(0);
     saveConfig();
     return TOPIC_OK;
+  } else if (topic.itemIs(3, "mqttInterval")) {
+    mqttInterval = topic.getArgAsLong(0);
+    saveConfig();
+    return TOPIC_OK;
 
 
   } else if (topic.itemIs(3, "saveconfig")) {
@@ -216,6 +212,7 @@ void customDevice::inform() {
   topicQueue.put("~/event/device/messageTime" , messageTime, "%g");
   topicQueue.put("~/event/device/powerOverride", powerOverride, "%g");
   topicQueue.put("~/event/device/brightnessOverride", brightnessOverride, "%g");
+  topicQueue.put("~/event/device/mqttInterval", mqttInterval, "%g");
 }
 
 //...............................................................................
@@ -257,10 +254,14 @@ void customDevice::getConfig() {
   else
     brightnessOverride = true;
 
-  animDelay = ffs.deviceCFG.readItemLong("animDelay");
-  if (animDelay == 0) {
-    animDelay = ANIM_DELAY;
-  }
+    animDelay = ffs.deviceCFG.readItemLong("animDelay");
+    if (animDelay == 0) {
+      animDelay = ANIM_DELAY;
+    }
+    mqttInterval = ffs.deviceCFG.readItemLong("mqttInterval");
+    if (mqttInterval == 0) {
+      mqttInterval = MQTT_INTERVAL;
+    }
   messageTime = ffs.deviceCFG.readItemLong("messageTime");
   if (messageTime == 0) {
     messageTime = MESSAGE_TIME;
@@ -282,6 +283,7 @@ void customDevice::saveConfig() {
   ffs.deviceCFG.writeItemLong("messageTime", messageTime);
   ffs.deviceCFG.writeItemLong("powerOverride", powerOverride);
   ffs.deviceCFG.writeItemLong("brightnessOverride", brightnessOverride);
+  ffs.deviceCFG.writeItemLong("mqttIn", mqttInterval);
   ffs.deviceCFG.saveFile();
   inform();
 }

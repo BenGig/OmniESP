@@ -1,11 +1,11 @@
 {
-  "device_name":            "",
+  "device_name":            "WZSensor",
   "device_username":        "admin",
   "device_password":        "admin",
 
-  "wifi":                   "off",
-  "wifi_ssid":              "",
-  "wifi_password":          "",
+  "wifi":                   "on",
+  "wifi_ssid":              "EDL-52850-1",
+  "wifi_password":          "9ol9-3lam-2nwh-prqw",
   "wifi_ip":                "",
   "wifi_netmask":           "",
   "wifi_gateway":           "",
@@ -22,7 +22,7 @@
   "lan_dns":                "",
 
   "ntp":                    "on",
-  "ntp_serverip":           "europe.pool.ntp.org",
+  "ntp_serverip":           "ch.pool.ntp.org",
 
   "update_localpath":       "",
   "update":                 "manual",

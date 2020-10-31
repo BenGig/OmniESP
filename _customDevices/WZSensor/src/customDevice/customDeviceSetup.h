@@ -24,18 +24,7 @@ ADC  A0     2     Analog
 
 // ... your defines here...
 // #define ...
-//#define HARDWARE_TYPE MD_MAX72XX::FC16_HW
-#define HARDWARE_TYPE MD_MAX72XX::FC16_HW
-#define MAX_DEVICES 4
-#define INITIAL_BRIGHTNESS 1
-#define CHAR_SPACING  1 // pixels between characters
-#define ANIM_DELAY 100
-#define MESSAGE_TIME 15
-#define MQTT_INTERVAL 179
-
-#define CLK_PIN   D5  // or SCK
-#define DATA_PIN  D7  // or MOSI
-#define CS_PIN    D6  // or SS
-#define LIGHT_PIN A0
-
-#define NTP_POOL_SERVER "ch.pool.ntp.org"
+#define PIR_PIN   D5  // or SCK
+#define DHT22_PIN  D7  // or MOSI
+#define BUZZER_PIN    D6  // or SS
+#define LIGHTSENSOR_PIN A0

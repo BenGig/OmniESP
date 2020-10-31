@@ -14,7 +14,7 @@
       {
         "type": "group",
         "name": "power_group",
-        "caption": "Power",
+        "caption": "Power Settings",
         "data": [
           {
             "type": "checkbox",
@@ -35,7 +35,7 @@
       {
         "type": "group",
         "name": "brightness_group",
-        "caption": "Brightness",
+        "caption": "Brightness Settings",
         "data": [
           {
             "type": "checkbox",

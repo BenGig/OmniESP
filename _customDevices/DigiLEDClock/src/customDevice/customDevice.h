@@ -9,7 +9,6 @@
 #include "customDeviceSetup.h"
 
 // modules required by device
-// ...your includes here...
 #include <MD_MAX72xx.h>
 #include <MD_Parola.h>
 
@@ -18,7 +17,7 @@
 //###############################################################################
 
 #define DEVICETYPE "DigiLEDClock"
-#define DEVICEVERSION "1.0"
+#define DEVICEVERSION "1.1"
 
 #define CLOCKTICK_MINUTE 1
 
@@ -43,9 +42,9 @@ private:
   String poolServerName = NTP_POOL_SERVER;
 
   int ledBrightness = INITIAL_BRIGHTNESS;
-  bool brightnessOverride = false;
-  bool powerOverride = false;
-  bool powerState = true;
+  bool brightnessOverride = false; // disable remote brightness setting
+  bool powerOverride = true;      // allow remote setting of display power state
+  bool powerState = true;         // initial LED display power on
 
   void getConfig();
   void saveConfig();
@@ -54,8 +53,9 @@ private:
   void displayTime();
   void displayText();
 
-  int animDelay;
-  int messageTime;
+  int animDelay = 100; // slow down scroll speed, higher is slower (unit ms)
+  int mqttInterval; // pause between MQTT status updates
+  int messageTime;     // how long to display a message
   int msgTimer = 0;
   char msgbuf[100];
   float roomBrightness();
