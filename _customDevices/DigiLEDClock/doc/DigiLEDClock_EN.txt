@@ -1,0 +1,73 @@
+DigiLEDClock
+============
+
+Pin standards valid for Wemos D1 R2 (mini).
+
+Digital clock, retro design, using a MAX72xx LED dotmatrix display. Display
+defaults to a clock display, text output is possible.
+
+
+MQTT Topics 
+===========
+
+Base path event/device/ (read) resp. set/device/ (write)
+
+
+power
+-----
+
+Display on or off:
+
+on|true|1 or off|false|0
+
+
+poweroverride
+-------------
+
+Enable/disable power setting
+
+on|true|1 or off|false|0
+
+
+brightness
+----------
+
+Brightness, surprise...
+
+0 - 15
+
+
+brightnessoverride
+------------------
+
+Enable/disable brightness setting
+
+on|true|1 or off|false|0
+
+
+message
+-------
+
+Text to be displayed
+
+
+animDelay
+---------
+
+Adjust the scrolling speed for teyt displays. Sets a delay, more means slower.
+
+Milliseconds
+
+
+messageTime
+-----------
+
+Time until the clock display comes back
+
+Seconds
+
+
+saveconfig
+----------
+
+Save configuration; no argument.

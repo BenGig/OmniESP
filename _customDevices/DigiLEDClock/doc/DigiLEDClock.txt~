@@ -1,0 +1,72 @@
+DigiLEDClock
+============
+
+Pin-Standards gelten für Wemos D1 R2 (mini).
+
+Retro-Digitaluhr mit MAX72xx LED-Punktmatrix-Display. Standardanzeige ist die
+Uhrzeit, über MQTT kann auch Text ausgegeben werden.
+
+MQTT Topics 
+===========
+
+Basispfad event/device/ (Lesen) resp. set/device/ (Schreiben)
+
+
+power
+-----
+
+Ein/Ausschalten:
+
+on|true|1 oder off|false|0
+
+
+poweroverride
+-------------
+
+Ein/Ausschalten freischalten/unterbinden
+
+on|true|1 oder off|false|0
+
+
+brightness
+----------
+
+Helligkeit der LCD-
+
+0 - 15
+
+
+brightnessoverride
+------------------
+
+Helligkeit ändern freischalten/unterbinden
+
+on|true|1 oder off|false|0
+
+
+message
+-------
+
+Anzeigetext
+
+
+animDelay
+---------
+
+Anpassen der Scroll-Geschwindigkeit des Lauftexts. Setzt eine Verzögerung, grösser ist langsamer.
+
+Millisekunden
+
+
+messageTime
+-----------
+
+Zeit nach der wieder die Uhr angezeigt wird.
+
+Sekunden
+
+
+saveconfig
+----------
+
+Konfiguration sichern; kein Argument.
