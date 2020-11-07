@@ -24,4 +24,9 @@ ADC  A0     2     Analog
 
 // ... your defines here...
 // #define ...
-#define DEFAULT_VALUE 500
+// Number of LEDs for left and right branch
+#define NUM_LEDS_LEFT 20
+#define NUM_LEDS_RIGHT 20
+// Control pins
+#define LEDOUT_L 2
+#define LEDOUT_R 3

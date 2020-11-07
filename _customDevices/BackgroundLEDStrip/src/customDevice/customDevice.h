@@ -6,18 +6,20 @@
 
 // device-specific setup
 #include "customDeviceSetup.h"
+//#include <ESP8266mDNS.h>
 
 // modules required by device
 // ...your includes here...
+#include <FastLED.h>
 
 //###############################################################################
 //  Device
 //###############################################################################
 
-#define DEVICETYPE "yourDeviceName"
-#define DEVICEVERSION "yourVersionString"
+#define DEVICETYPE "BackgroundLEDStrip"
+#define DEVICEVERSION "v1.0.0"
 
-// maintainer: ...your name...
+// maintainer: Bengt Giger
 
 class customDevice : public Device {
 
@@ -32,8 +34,17 @@ public:
 
 private:
   // ...your sensor objects, modules, functions here...
-  unsigned long configItem= DEFAULT_VALUE; // exammple
-  float measure(); // example
-  void inform(); // example
-  unsigned long lastPoll= 0;
+  int brightness=0;
+  int red=255;
+  int green=184;
+  int blue=114;
+  int lastPoll=0;
+  CRGB leds_l[NUM_LEDS_LEFT];
+  CRGB leds_r[NUM_LEDS_RIGHT];
+  void getConfig();
+  void saveConfig();
+  void inform();
+  void setRGB(int r, int g, int b);
+  void setBrightness(int brightness);
+  void setDots();
 };

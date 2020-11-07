@@ -1,3 +1,6 @@
 {
-    "configItem":"42"
+    "brightness":"70",
+    "red": "255",
+    "green": "184",
+    "blue": "114"
 }

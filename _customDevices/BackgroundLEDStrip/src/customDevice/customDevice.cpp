@@ -1,6 +1,11 @@
 #include "customDevice.h"
 #include <Arduino.h>
 
+// Helper function: LED brigthness is not linear, scale from standard interval 85
+int scale(int raw) {
+  return 0.0035*raw*raw;
+}
+
 //===============================================================================
 //  Device
 //===============================================================================
@@ -23,23 +28,32 @@ void customDevice::start() {
 
   Device::start(); // mandatory
 
-  // ... your code here ...
-  configItem = ffs.deviceCFG.readItem("configItem").toInt();
-  logging.info("configItem is "+String(configItem));
+  CRGB leds_l[NUM_LEDS_LEFT];
+  CRGB leds_r[NUM_LEDS_RIGHT];
+  FastLED.addLeds<NEOPIXEL, LEDOUT_L>(leds_l, NUM_LEDS_LEFT);
+  FastLED.addLeds<NEOPIXEL, LEDOUT_R>(leds_r, NUM_LEDS_RIGHT);
+
+  red   = ffs.deviceCFG.readItem("red").toInt();
+  green = ffs.deviceCFG.readItem("green").toInt();
+  blue  = ffs.deviceCFG.readItem("blue").toInt();
+  brightness  = ffs.deviceCFG.readItem("brightness").toInt();
+
+  setDots();
+
+  FastLED.show();
+
+  logging.info("red is "+String(red));
+  logging.info("green is "+String(red));
+  logging.info("blue is "+String(red));
+  logging.info("brightness is "+String(red));
   logging.info("device running");
 }
 
-//...............................................................................
-// measure
-//...............................................................................
-
-float customDevice::measure() {
-  return 0.815;
-}
-
 void customDevice::inform() {
-  topicQueue.put("~/event/device/sensor1", measure());
-  topicQueue.put("~/event/device/sensor2 foobar");
+  topicQueue.put("~/event/device/brightness", brightness);
+  topicQueue.put("~/event/device/red", red);
+  topicQueue.put("~/event/device/green", red);
+  topicQueue.put("~/event/device/blue", red);
 }
 
 //...............................................................................
@@ -71,7 +85,29 @@ String customDevice::set(Topic &topic) {
 
   if (topic.getItemCount() != 4) // ~/set/device/yourItem
     return TOPIC_NO;
-  if (topic.itemIs(3, "yourItem")) {
+  if (topic.itemIs(3, "brightness")) {
+    brightness = int(topic.getArg(0));
+    setBrightness(brightness);
+    ffs.deviceCFG.writeItem("brightness", String(brightness));
+    ffs.deviceCFG.saveFile();
+    return TOPIC_OK;
+  } else if (topic.itemIs(3, "red")) {
+    red = int(topic.getArg(0));
+    setRGB(red,green,blue);
+    ffs.deviceCFG.writeItem("red", String(red));
+    ffs.deviceCFG.saveFile();
+    return TOPIC_OK;
+  } else if (topic.itemIs(3, "green")) {
+    green = int(topic.getArg(0));
+    setRGB(red,green,blue);
+    ffs.deviceCFG.writeItem("green", String(green));
+    ffs.deviceCFG.saveFile();
+    return TOPIC_OK;
+  } else if (topic.itemIs(3, "blue")) {
+    blue = int(topic.getArg(0));
+    setRGB(red,green,blue);
+    ffs.deviceCFG.writeItem("blue", String(blue));
+    ffs.deviceCFG.saveFile();
     return TOPIC_OK;
   } else {
     return TOPIC_NO;
@@ -93,8 +129,14 @@ String customDevice::get(Topic &topic) {
 
   if (topic.getItemCount() != 4) // ~/get/device/sensor1
     return TOPIC_NO;
-  if (topic.itemIs(3, "sensor1")) {
-    return String(measure());
+  if (topic.itemIs(3, "brightness")) {
+    return String(brightness);
+  } else if (topic.itemIs(3, "red")) {
+    return String(red);
+  } else if (topic.itemIs(3, "green")) {
+    return String(green);
+  } else if (topic.itemIs(3, "blue")) {
+    return String(blue);
   } else {
     return TOPIC_NO;
   }
@@ -106,15 +148,43 @@ String customDevice::get(Topic &topic) {
 void customDevice::on_events(Topic &topic) {
 
   // central business logic
+
 }
 
 //...............................................................................
 //  on request, fillDashboard with values
 //...............................................................................
 String customDevice::fillDashboard() {
-  //topicQueue.put("~/event/device/drawer/index 1");
-  //topicQueue.put("~/set/device/drawer/index 1");
+  topicQueue.put("~/event/device/brightness", brightness);
+  topicQueue.put("~/event/device/red", red);
+  topicQueue.put("~/event/device/green", green);
+  topicQueue.put("~/event/device/blue", blue);
 
   logging.debug("dashboard filled with values");
   return TOPIC_OK;
+}
+
+// Loop over all LEDs and set RGB values
+void customDevice::setDots() {
+  for (int dot = 0; dot < NUM_LEDS_LEFT; dot++) {
+    leds_l[dot].setRGB(red,green,blue);
+  }
+  for (int dot = 0; dot < NUM_LEDS_RIGHT; dot++) {
+    leds_r[dot].setRGB(red,green,blue);
+  }
+}
+
+void customDevice::setRGB(int r, int g, int b) {
+  red = max(r, 255);
+  green = max(g, 255);
+  blue = max(g, 255);
+  setDots();
+}
+
+void customDevice::setBrightness(int brightness) {
+  int b = max(brightness, 255) / 255;
+  red = red * b / 255;
+  green = green * b / 255;
+  red =  red * b / 255;
+  setRGB(red, green, blue);
 }
