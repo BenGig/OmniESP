@@ -5,29 +5,50 @@
     "caption": "Dashboard",
     "data": [
       {
-        "type": "text",
-        "name": "clock",
-        "caption": "Time",
-        "readonly": 1,
-        "event": "~/event/clock/time",
-        "inputtype": "datetime"
+        "type": "slider",
+        "name": "animspeed",
+        "caption": "Animationsgeschwindigkeit",
+        "min": 0,
+        "max": 59,
+        "event": "~/event/device/animspeed",
+        "action": "~/set/device/animspeed"
       },
       {
-        "type": "text",
-        "name": "sensor1",
-        "caption": "Sensor 1",
-        "readonly": 1,
-        "event": "~/event/device/sensor1",
-        "suffix": " mA"
+        "type": "slider",
+        "name": "brightness",
+        "caption": "Helligkeit",
+        "min": 0,
+        "max": 255,
+        "event": "~/event/device/brightness",
+        "action": "~/set/device/brightness"
       },
       {
-        "type": "text",
-        "name": "sensor2",
-        "caption": "Sensor 2",
-        "readonly": 1,
-        "event": "~/event/device/sensor2",
-        "suffix": " °C"
+        "type": "slider",
+        "name": "red",
+        "caption": "Rot",
+        "min": 0,
+        "max": 255,
+        "event": "~/event/device/red",
+        "action": "~/set/device/red"
+      },
+      {
+        "type": "slider",
+        "name": "green",
+        "caption": "Grün",
+        "min": 0,
+        "max": 255,
+        "event": "~/event/device/green",
+        "action": "~/set/device/green"
+      },
+      {
+        "type": "slider",
+        "name": "blue",
+        "caption": "Blau",
+        "min": 0,
+        "max": 255,
+        "event": "~/event/device/blue",
+        "action": "~/set/device/blue"
       }
-    ]
+  ]
   }
 ]

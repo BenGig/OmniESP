@@ -1,6 +1,7 @@
 {
-    "brightness":"70",
+    "brightness":"20",
     "red": "255",
-    "green": "184",
-    "blue": "114"
+    "green": "68",
+    "blue": "18",
+    "animspeed": "55"
 }

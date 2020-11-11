@@ -2,13 +2,16 @@
 #include <Arduino.h>
 
 // Helper function: LED brigthness is not linear, scale from standard interval 85
-int scale(int raw) {
+long scale(long raw) {
   return 0.0035*raw*raw;
 }
 
 //===============================================================================
 //  Device
 //===============================================================================
+
+Adafruit_NeoPixel leds_l(NUM_LEDS_LEFT, LEDOUT_L, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds_r(NUM_LEDS_RIGHT, LEDOUT_R, NEO_GRB + NEO_KHZ800);
 
 //-------------------------------------------------------------------------------
 //  constructor
@@ -28,32 +31,38 @@ void customDevice::start() {
 
   Device::start(); // mandatory
 
-  CRGB leds_l[NUM_LEDS_LEFT];
-  CRGB leds_r[NUM_LEDS_RIGHT];
-  FastLED.addLeds<NEOPIXEL, LEDOUT_L>(leds_l, NUM_LEDS_LEFT);
-  FastLED.addLeds<NEOPIXEL, LEDOUT_R>(leds_r, NUM_LEDS_RIGHT);
+  logging.info("Setup device");
 
-  red   = ffs.deviceCFG.readItem("red").toInt();
-  green = ffs.deviceCFG.readItem("green").toInt();
-  blue  = ffs.deviceCFG.readItem("blue").toInt();
-  brightness  = ffs.deviceCFG.readItem("brightness").toInt();
+  #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
+    clock_prescale_set(clock_div_1);
+  #endif
+
+  getConfig();
+  initPattern();
+
+  leds_l.begin(); 
+  leds_r.begin();
+  leds_l.clear();
+  leds_r.clear(); 
 
   setDots();
 
-  FastLED.show();
-
-  logging.info("red is "+String(red));
-  logging.info("green is "+String(red));
-  logging.info("blue is "+String(red));
-  logging.info("brightness is "+String(red));
   logging.info("device running");
 }
 
 void customDevice::inform() {
-  topicQueue.put("~/event/device/brightness", brightness);
-  topicQueue.put("~/event/device/red", red);
-  topicQueue.put("~/event/device/green", red);
-  topicQueue.put("~/event/device/blue", red);
+  topicQueue.put("~/event/device/brightness", int(brightness));
+  topicQueue.put("~/event/device/red", int(red));
+  topicQueue.put("~/event/device/green", int(green));
+  topicQueue.put("~/event/device/blue", int(blue));
+  topicQueue.put("~/event/device/animspeed", int(animspeed));
+}
+
+void customDevice::printValues() {
+  logging.debug("red is "+String(red));
+  logging.debug("green is "+String(green));
+  logging.debug("blue is "+String(blue));
+  logging.info("brightness is "+String(brightness));
 }
 
 //...............................................................................
@@ -61,11 +70,14 @@ void customDevice::inform() {
 //...............................................................................
 
 void customDevice::handle() {
-
   unsigned long now = millis();
-  if (now - lastPoll >= 3000) {
+  if (now - lastPoll >= 59000 - animspeed*1000) {
+    patternPointer++;
+    if (patternPointer >= (NUM_LEDS_LEFT+NUM_LEDS_RIGHT)/2) {
+      patternPointer = 0;
+    }
+    setDots();
     lastPoll = now;
-    inform();
   }
 }
 
@@ -86,28 +98,29 @@ String customDevice::set(Topic &topic) {
   if (topic.getItemCount() != 4) // ~/set/device/yourItem
     return TOPIC_NO;
   if (topic.itemIs(3, "brightness")) {
-    brightness = int(topic.getArg(0));
+    brightness = topic.getArgAsLong(0);
     setBrightness(brightness);
-    ffs.deviceCFG.writeItem("brightness", String(brightness));
-    ffs.deviceCFG.saveFile();
+    setConfig();
     return TOPIC_OK;
   } else if (topic.itemIs(3, "red")) {
-    red = int(topic.getArg(0));
+    red = topic.getArgAsLong(0);
     setRGB(red,green,blue);
-    ffs.deviceCFG.writeItem("red", String(red));
-    ffs.deviceCFG.saveFile();
+    setConfig();
     return TOPIC_OK;
   } else if (topic.itemIs(3, "green")) {
-    green = int(topic.getArg(0));
+    green = topic.getArgAsLong(0);
+    printValues();
     setRGB(red,green,blue);
-    ffs.deviceCFG.writeItem("green", String(green));
-    ffs.deviceCFG.saveFile();
+    setConfig();
     return TOPIC_OK;
   } else if (topic.itemIs(3, "blue")) {
-    blue = int(topic.getArg(0));
+    blue = topic.getArgAsLong(0);
     setRGB(red,green,blue);
-    ffs.deviceCFG.writeItem("blue", String(blue));
-    ffs.deviceCFG.saveFile();
+    setConfig();
+    return TOPIC_OK;
+  } else if (topic.itemIs(3, "animspeed")) {
+    animspeed = topic.getArgAsLong(0);
+    setConfig();
     return TOPIC_OK;
   } else {
     return TOPIC_NO;
@@ -137,6 +150,8 @@ String customDevice::get(Topic &topic) {
     return String(green);
   } else if (topic.itemIs(3, "blue")) {
     return String(blue);
+  } else if (topic.itemIs(3, "animspeed")) {
+    return String(animspeed);
   } else {
     return TOPIC_NO;
   }
@@ -155,10 +170,11 @@ void customDevice::on_events(Topic &topic) {
 //  on request, fillDashboard with values
 //...............................................................................
 String customDevice::fillDashboard() {
-  topicQueue.put("~/event/device/brightness", brightness);
-  topicQueue.put("~/event/device/red", red);
-  topicQueue.put("~/event/device/green", green);
-  topicQueue.put("~/event/device/blue", blue);
+  topicQueue.put("~/event/device/brightness", int(brightness));
+  topicQueue.put("~/event/device/red", int(red));
+  topicQueue.put("~/event/device/green", int(green));
+  topicQueue.put("~/event/device/blue", int(blue));
+  topicQueue.put("~/event/device/animspeed", int(animspeed));
 
   logging.debug("dashboard filled with values");
   return TOPIC_OK;
@@ -166,25 +182,67 @@ String customDevice::fillDashboard() {
 
 // Loop over all LEDs and set RGB values
 void customDevice::setDots() {
-  for (int dot = 0; dot < NUM_LEDS_LEFT; dot++) {
-    leds_l[dot].setRGB(red,green,blue);
+  // for (int dot = 0; dot < NUM_LEDS_LEFT; dot++) {
+  //   leds_l.setPixelColor(dot, red*brightness/255,green*brightness/255,blue*brightness/255);
+  // }
+  // for (int dot = 0; dot < NUM_LEDS_RIGHT; dot++) {
+  //   leds_r.setPixelColor(dot, red*brightness/255,green*brightness/255,blue*brightness/255);
+  // }
+  
+  for (int i=0; i<NUM_LEDS_LEFT; i++) {
+    leds_l.setPixelColor(i, 
+        (red+sin((i+NUM_LEDS_LEFT-patternPointer-1)/2)*WAVE_AMPLITUDE)*brightness/255, 
+        (green+sin((i+NUM_LEDS_LEFT-patternPointer-1)/2)*WAVE_AMPLITUDE)*brightness/255, 
+        (blue+sin((i+NUM_LEDS_LEFT-patternPointer-1)/2)*WAVE_AMPLITUDE)*brightness/255);
   }
-  for (int dot = 0; dot < NUM_LEDS_RIGHT; dot++) {
-    leds_r[dot].setRGB(red,green,blue);
+  leds_l.show();
+  for (int i=0; i<NUM_LEDS_RIGHT; i++) {
+    leds_r.setPixelColor(i, 
+        (red+sin((i+patternPointer)/2)*WAVE_AMPLITUDE)*brightness/255, 
+        (green+sin((i+patternPointer)/2)*WAVE_AMPLITUDE)*brightness/255, 
+        (blue+sin((i+patternPointer)/2)*WAVE_AMPLITUDE)*brightness/255);
   }
+  leds_r.show();
 }
 
-void customDevice::setRGB(int r, int g, int b) {
-  red = max(r, 255);
-  green = max(g, 255);
-  blue = max(g, 255);
+void customDevice::setRGB(long r, long g, long b) {
+  red = r;
+  green = g;
+  blue = b;
   setDots();
 }
 
-void customDevice::setBrightness(int brightness) {
-  int b = max(brightness, 255) / 255;
-  red = red * b / 255;
-  green = green * b / 255;
-  red =  red * b / 255;
+void customDevice::setBrightness(long b) {
+  brightness = b;
   setRGB(red, green, blue);
+}
+
+
+//...............................................................................
+//  Persistent configuration read/write
+//...............................................................................
+void customDevice::getConfig() {
+  brightness = ffs.deviceCFG.readItemLong("brightness");
+  red = ffs.deviceCFG.readItemLong("red");
+  green = ffs.deviceCFG.readItemLong("green");
+  blue = ffs.deviceCFG.readItemLong("blue");
+  animspeed = ffs.deviceCFG.readItemLong("animspeed");
+  logging.debug("Values read from FS");
+  printValues();
+}
+
+void customDevice::setConfig() {
+  ffs.deviceCFG.writeItemLong("brightness", brightness);
+  ffs.deviceCFG.writeItemLong("red", red);
+  ffs.deviceCFG.writeItemLong("green", green);
+  ffs.deviceCFG.writeItemLong("blue", blue);
+  ffs.deviceCFG.writeItemLong("animspeed", animspeed);
+  ffs.deviceCFG.saveFile();
+  inform();
+}
+
+void customDevice::initPattern() {
+  for (int i=0; i<((NUM_LEDS_LEFT+NUM_LEDS_RIGHT)/2); i++) {
+    wave_pattern[i] = sin(i/2)*WAVE_AMPLITUDE;
+  }
 }

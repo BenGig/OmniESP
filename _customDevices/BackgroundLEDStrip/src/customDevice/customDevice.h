@@ -6,11 +6,13 @@
 
 // device-specific setup
 #include "customDeviceSetup.h"
-//#include <ESP8266mDNS.h>
 
 // modules required by device
 // ...your includes here...
-#include <FastLED.h>
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
 
 //###############################################################################
 //  Device
@@ -34,17 +36,21 @@ public:
 
 private:
   // ...your sensor objects, modules, functions here...
-  int brightness=0;
-  int red=255;
-  int green=184;
-  int blue=114;
+  long brightness=0;
+  long red=255;
+  long green=184;
+  long blue=114;
+  long animspeed=20;
   int lastPoll=0;
-  CRGB leds_l[NUM_LEDS_LEFT];
-  CRGB leds_r[NUM_LEDS_RIGHT];
   void getConfig();
-  void saveConfig();
+  void setConfig();
   void inform();
-  void setRGB(int r, int g, int b);
-  void setBrightness(int brightness);
+  void setRGB(long r, long g, long b);
+  void setBrightness(long b);
   void setDots();
+  void printValues();
+  void initPattern();
+  
+  int patternPointer=0;
+  int wave_pattern[NUM_LEDS_LEFT+NUM_LEDS_RIGHT];
 };

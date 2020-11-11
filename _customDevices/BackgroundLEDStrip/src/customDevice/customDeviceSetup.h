@@ -25,8 +25,12 @@ ADC  A0     2     Analog
 // ... your defines here...
 // #define ...
 // Number of LEDs for left and right branch
-#define NUM_LEDS_LEFT 20
-#define NUM_LEDS_RIGHT 20
+#define NUM_LEDS_LEFT 75
+#define NUM_LEDS_RIGHT 75
 // Control pins
-#define LEDOUT_L 2
-#define LEDOUT_R 3
+#define LEDOUT_L D4
+#define LEDOUT_R D3
+
+#define LED_TYPE WS2812B
+
+#define WAVE_AMPLITUDE 25
